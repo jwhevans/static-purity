@@ -6,24 +6,24 @@
 # This file constitutes the program static-purity and is the static
 # website generator for mnml.blog
 #
-# This file is free software and may be modified and/or redistribuited 
-# under the terms of the GNU General Public License by the Free 
+# This file is free software and may be modified and/or redistribuited
+# under the terms of the GNU General Public License by the Free
 # Software Foundation.
 #
-# I built the software for my own learning and use. I hope you find it 
-# useful. This software comes with NO WARRANTY; without even an 
-# implied warranty of merchantability or fitness for a particular 
+# I built the software for my own learning and use. I hope you find it
+# useful. This software comes with NO WARRANTY; without even an
+# implied warranty of merchantability or fitness for a particular
 # purpose. See the GNU General Public License for more details.
 #
-# There should be a copy of the GNU General Public License stored in 
-# any repository hosting this software. If you have not received one, 
+# There should be a copy of the GNU General Public License stored in
+# any repository hosting this software. If you have not received one,
 # please see <http:www.gnu.org/licenses/>
 ######################################################################
 
 import os, sys, markdown as md, time
 from datetime import date
 
-VERSION = "2020-01-26"
+VERSION = "2020-02-15"
 PROJECT_NAME = "static-purity"
 AUTHOR = "James Evans"
 COPYRIGHT = ""
@@ -36,19 +36,19 @@ default_dirs = ['css', 'drafts', 'html', 'img', 'md']
 help_msg = """
 COMMAND
     static-purity.py
- 
+
 DESCRIPTION
-    static-purity scans a directory for markdown files that are new 
-    or have been modified since the last time the program ran. It 
-    then generates html files from those markdown files and creates 
-    or modifies a directory structure to host a small blog.   
+    static-purity scans a directory for markdown files that are new
+    or have been modified since the last time the program ran. It
+    then generates html files from those markdown files and creates
+    or modifies a directory structure to host a small blog.
 
     Available options:
 
-    --build       Build entire site.  All files and 
+    --build       Build entire site.  All files and
                   link structure are regenerated
 
-    --update      Update only files that have been 
+    --update      Update only files that have been
                   added modified since last program run
                   (This option not available currently)
 
@@ -85,7 +85,7 @@ def main():
     # or to exit and create their own before running again
     if not any(fnm.endswith('.md') for fnm in os.listdir('./md/')):
         file_is_missing("Markdown")
-    
+
     if not os.path.exists('./css/styles.css'):
         file_is_missing("CSS")
 
@@ -111,7 +111,7 @@ def file_is_missing(fnm):
 WARNING:
     {fnm} files were not found.  These files are necessary for {PROJECT_NAME}
     to build your site. You may continue and a template file will be
-    created or you may quit and create {fnm} files first. 
+    created or you may quit and create {fnm} files first.
     Continue? y/n: """)
     if res == 'y' or res == 'Y':
         print(f"Creating template {fnm}...")
@@ -128,7 +128,7 @@ WARNING:
 def sanitize_filenames(path):
     fnms = os.listdir(path)
     for fnm in fnms:
-        os.rename(os.path.join(path, fnm), 
+        os.rename(os.path.join(path, fnm),
         os.path.join(path, fnm.replace(' ', '-')))
 
 
@@ -143,7 +143,7 @@ def create_missing_file(fnm):
         f.close()
     else:
         print(f"WARNING: Could not create necessary file")
-        
+
 
 def md_to_html(path):
     for md_file in all_md_sorted_rev:
@@ -157,13 +157,15 @@ def md_to_html(path):
 
 def create_html(content, name, title):
     dir_depth = 1 # deepest directory level - all execept index
+    html_bef = html_before
+    html_aft = html_after
 
     idx = all_md_sorted_rev.index(name)
-    if idx == 0: 
+    if idx == 0:
         # first record - this is the index
         dir_depth = 0
-        html_bef = html_before.replace('{{PREV_LINK}}', '←prev')
-        html_aft = html_after.replace('{{PREV_LINK}}', '←prev')
+        html_bef = html_bef.replace('{{PREV_LINK}}', '←prev')
+        html_aft = html_aft.replace('{{PREV_LINK}}', '←prev')
 
         if len(all_md_sorted_rev) > 1:
             next_fnm = './html/' + all_md_sorted_rev[idx + 1][:-2] + 'html'
@@ -175,24 +177,24 @@ def create_html(content, name, title):
             next_link = f"""<a href="{next_fnm}">next→</a>"""
             html_bef = html_bef.replace('{{NEXT_LINK}}', next_link)
             html_aft = html_aft.replace('{{NEXT_LINK}}', next_link)
-    if idx == 1: 
+    if idx == 1:
         # second record - prev must point to index
         prev_fnm = '../index.html'
         prev_link = f"""<a href="{prev_fnm}">←prev</a>"""
-        html_bef = html_before.replace('{{PREV_LINK}}', prev_link)
-        html_aft = html_after.replace('{{PREV_LINK}}', prev_link)
+        html_bef = html_bef.replace('{{PREV_LINK}}', prev_link)
+        html_aft = html_aft.replace('{{PREV_LINK}}', prev_link)
 
         next_fnm = all_md_sorted_rev[idx + 1][:-2] + 'html'
         next_link = f"""<a href="{next_fnm}">next→</a>"""
         html_bef = html_bef.replace('{{NEXT_LINK}}', next_link)
         html_aft = html_aft.replace('{{NEXT_LINK}}', next_link)
-    if idx >  1 and idx < len(all_md_sorted_rev) - 2: 
+    if idx >  1 and idx < len(all_md_sorted_rev) - 2:
         # middle records - process normally
         prev_fnm = all_md_sorted_rev[idx - 1][:-2] + 'html'
         prev_link = f"""<a href="{prev_fnm}">←prev</a>"""
-        html_bef = html_before.replace('{{PREV_LINK}}', prev_link)
-        html_aft = html_after.replace('{{PREV_LINK}}', prev_link)
-        
+        html_bef = html_bef.replace('{{PREV_LINK}}', prev_link)
+        html_aft = html_aft.replace('{{PREV_LINK}}', prev_link)
+
         next_fnm = all_md_sorted_rev[idx + 1][:-2] + 'html'
         next_link = f"""<a href="{next_fnm}">next→</a>"""
         html_bef = html_bef.replace('{{NEXT_LINK}}', next_link)
@@ -201,8 +203,8 @@ def create_html(content, name, title):
         # last record - next must point to archive
         prev_fnm = all_md_sorted_rev[idx - 1][:-2] + 'html'
         prev_link = f"""<a href="{prev_fnm}">←prev</a>"""
-        html_bef = html_before.replace('{{PREV_LINK}}', prev_link)
-        html_aft = html_after.replace('{{PREV_LINK}}', prev_link)
+        html_bef = html_bef.replace('{{PREV_LINK}}', prev_link)
+        html_aft = html_aft.replace('{{PREV_LINK}}', prev_link)
 
         next_fnm = '../archive.html'
         next_link = f"""<a href="{next_fnm}">next→</a>"""
@@ -223,12 +225,12 @@ def create_html(content, name, title):
         f = open('./index.html', 'w')
     else:
         f = open('./html/' + name[:-2] + 'html', 'w')
-    
+
     f.write(html_bef)
     f.write(content)
     f.write(html_aft)
     f.close()
-    
+
 
 def create_archive():
     group = all_md_sorted_rev[0][:4]
@@ -245,7 +247,7 @@ def create_archive():
                     f.write('  * ' + group + '\n')
                     f.write('    * [' + md_file[9:-3].title().replace('-',' ')\
                         + '](../html/' + md_file[0:-2] + 'html)\n')
-    
+
     with open('./archive.md', 'r') as f:
         content = md.markdown(f.read())
         f.close()
@@ -269,10 +271,10 @@ def create_archive():
     with open('./archive.html', 'w') as f:
         f.write(html_bef)
         f.write(content)
-        f.write(html_aft)  
+        f.write(html_aft)
         f.close()
-    
-######################################################################    
+
+######################################################################
 default_index_md = f"""<p class = "dateline">{TODAY}</p>
 
 #{PROJECT_NAME}
@@ -422,7 +424,7 @@ h1, h2, h3, h4, h5, h6 {
 
 h3, h4, h5, h6 {
     font-style: italic;
-} 
+}
 """
 # end of defadefault_styles_css
 ######################################################################
@@ -455,7 +457,7 @@ html_before = """\
 </div> <!-- top-nav -->
 
 <div id=article-content">
-""" 
+"""
 # end of html_before
 ######################################################################
 html_after = """
@@ -471,7 +473,7 @@ html_after = """
 <div id="footer">
 {{COPYRIGHT}}
 <a href="{{MD_SOURCE}}">Markdown source for this page</a><br/>
-(Site generated by 
+(Site generated by
 <a href="https://github.com/jwhevans/static-purity">Static-Purity</a>)
 </div> <!-- footer -->
 
@@ -479,7 +481,7 @@ html_after = """
 
 </body>
 </html>
-""" 
+"""
 # end of html_after
 ######################################################################
 main()
