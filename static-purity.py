@@ -23,7 +23,7 @@
 import os, sys, markdown as md, time
 from datetime import date
 
-VERSION = "2020-02-15"
+VERSION = "2020-02-20"
 PROJECT_NAME = "static-purity"
 AUTHOR = "James Evans"
 COPYRIGHT = ""
@@ -237,16 +237,20 @@ def create_archive():
     with open('./archive.md', 'w') as f:
         f.write('  * ' + group + '\n')
         for md_file in all_md_sorted_rev:
+            idx = all_md_sorted_rev.index(md_file)
             if not str(md_file).startswith('.'):
-                if group == md_file[:4]:
+                if idx == 0:
                     f.write('    * [' + md_file[9:-3].title().replace('-',' ')\
-                        + '](../html/' + md_file[0:-2] + 'html)\n')
+                        + '](index.html)\n')
+                elif group == md_file[:4]:
+                    f.write('    * [' + md_file[9:-3].title().replace('-',' ')\
+                        + '](./html/' + md_file[0:-2] + 'html)\n')
                 else:
                     idx = all_md_sorted_rev.index(md_file)
                     group = all_md_sorted_rev[idx][:4]
                     f.write('  * ' + group + '\n')
                     f.write('    * [' + md_file[9:-3].title().replace('-',' ')\
-                        + '](../html/' + md_file[0:-2] + 'html)\n')
+                        + '](./html/' + md_file[0:-2] + 'html)\n')
 
     with open('./archive.md', 'r') as f:
         content = md.markdown(f.read())
